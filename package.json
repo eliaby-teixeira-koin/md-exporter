@@ -1,0 +1,15 @@
+{
+	"name": "md-exporter",
+	"private": true,
+	"description": "CLI genérico: Markdown → PDF/HTML (Chromium via md-to-pdf)",
+	"bin": {
+		"md-export": "./cli.js"
+	},
+	"scripts": {
+		"export": "node cli.js",
+		"export:checkout": "node cli.js -i ../docs/checkout-docs.md -o ./output -f both"
+	},
+	"devDependencies": {
+		"md-to-pdf": "^5.2.4"
+	}
+}
