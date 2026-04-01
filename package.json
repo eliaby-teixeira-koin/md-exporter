@@ -7,7 +7,7 @@
 	},
 	"scripts": {
 		"export": "node cli.js",
-		"export:checkout": "node cli.js -i ../docs/checkout-docs.md -o ./output -f both"
+		"export:example": "node cli.js -i ../docs/exemplo.md -o ./output -f both"
 	},
 	"devDependencies": {
 		"md-to-pdf": "^5.2.4"

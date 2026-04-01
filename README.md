@@ -1,93 +1,166 @@
 # md-exporter
 
-CLI genérico para gerar **PDF** e/ou **HTML** a partir de qualquer arquivo **Markdown**, usando [md-to-pdf](https://github.com/simonhaenisch/md-to-pdf) (Chromium headless).
+CLI para gerar **PDF** e/ou **HTML** a partir de arquivos **Markdown** ([md-to-pdf](https://github.com/simonhaenisch/md-to-pdf) + Chromium).
 
-## Instalação
+O comando instalado chama-se **`md-export`** (o nome do pacote npm local é `md-exporter`).
+
+---
+
+## Instalação global (recomendado)
+
+**1.** Clone ou copie o repositório e, **uma vez**, instale as dependências na pasta do projeto:
 
 ```bash
-cd koin/md-exporter
+cd /path/to/md-exporter
 npm install
 ```
 
-## Uso
+**2.** Instale o CLI no Node global apontando para essa pasta:
 
 ```bash
-node cli.js --input <arquivo.md> [--output <diretório>] [--format pdf|html|both]
+npm install -g /path/to/md-exporter
 ```
 
-| Opção | Abreviação | Padrão | Descrição |
-|-------|------------|--------|-----------|
-| `--input` | `-i` | — | Caminho do `.md` (**obrigatório**) |
-| `--output` | `-o` | `./output` | Pasta onde gravar os arquivos (é criada se não existir) |
+Troque `/path/to/md-exporter` pelo caminho **absoluto** do clone no seu disco (por exemplo `~/projetos/md-exporter`). Use caminho **absoluto** ou `~/...`.
+
+**3.** Confira se o comando está no `PATH`:
+
+```bash
+md-export --help
+```
+
+Para **atualizar** depois de mudar código ou dependências:
+
+```bash
+cd /path/to/md-exporter && npm install
+npm install -g /path/to/md-exporter
+```
+
+---
+
+## Como usar
+
+Depois da instalação global, rode **`md-export`** de **qualquer pasta**.
+
+### Sintaxe
+
+```text
+md-export -i <arquivo.md> [-o <pasta-saída>] [-f pdf|html|both]
+```
+
+Ou forma **posicional** (útil para evitar conflito de flags com outros tools):
+
+```text
+md-export <arquivo.md> [pasta-saída] [pdf|html|both]
+```
+
+| Opção | Curto | Padrão | Descrição |
+|-------|-------|--------|-----------|
+| `--input` | `-i` | *(obrigatório)* | Arquivo `.md` de entrada |
+| `--output` | `-o` | `./output`* | Pasta de saída (criada se não existir). Aceita `~/Downloads` |
 | `--format` | `-f` | `both` | `pdf`, `html` ou `both` |
 | `--help` | `-h` | — | Ajuda |
 
-O **basedir** para imagens e links relativos é sempre a **pasta do arquivo `.md`**, para `./figura.png` e similares funcionarem.
+\*O padrão `./output` é relativo ao **diretório atual do terminal**, não à pasta do `md-exporter`.
 
-### Exemplos
+Imagens e links **relativos** no Markdown são resolvidos a partir da **pasta do arquivo `.md`**.
+
+### Exemplos (instalação global)
 
 ```bash
-# PDF + HTML em ./output (padrão)
-node cli.js -i ../docs/checkout-docs.md
+# PDF + HTML na pasta padrão ./output (relativa a onde você está no terminal)
+md-export -i ~/Documentos/artigo.md
 
-# Flags com ~ no output
-node cli.js -i ../docs/checkout-docs.md -o ~/Downloads -f both
-
-# Forma posicional: arquivo → pasta → formato (evita confusão com npm)
-node cli.js ../docs/checkout-docs.md ~/Downloads both
+# PDF + HTML em Downloads
+md-export -i ~/projetos/docs/manual.md -o ~/Downloads -f both
 
 # Só PDF
-node cli.js -i ../docs/checkout-docs.md -o ~/Desktop/exports -f pdf
+md-export -i ~/Documentos/notas.md -o ~/Desktop -f pdf
+
+# Posicional: arquivo → pasta → formato
+md-export ~/Documentos/artigo.md ~/Downloads both
 ```
 
-### `npm run export` e o `--`
+Sempre que possível use **caminhos absolutos** em `-i` e `-o` para o resultado não depender da pasta em que você abriu o terminal.
 
-O **npm** reserva `-f` para **--force** e pode não repassar `-i` / `-o` ao script. Por isso apareceu saída em `./output` mesmo pedindo `~/Downloads`.
+---
 
-**Sempre use `--` antes dos argumentos do `cli.js` quando usar flags:**
+## Desenvolvimento (sem `npm install -g`)
+
+Na pasta do projeto, após `npm install`:
 
 ```bash
-npm run export -- -i ../docs/checkout-docs.md -o ~/Downloads -f both
+node cli.js -i ~/Documentos/artigo.md -o ~/Downloads -f both
 ```
 
-**Ou** use a forma **posicional** (só precisa de um `--` entre `export` e os args):
+**Link simbólico global** (alterações no código refletem na hora):
 
 ```bash
-npm run export -- ../docs/checkout-docs.md ~/Downloads both
+cd /path/to/md-exporter
+npm link
+# depois: md-export ... em qualquer pasta
 ```
 
-Com **bin** do npm:
+Remover o link: `npm unlink -g md-exporter`
+
+### `npm run` neste repositório
+
+O npm trata `-f` como `--force`. Ao usar `npm run export` com flags, use **`--`** antes dos argumentos:
 
 ```bash
-npx md-export -i ../docs/checkout-docs.md -o ~/Downloads -f both
+npm run export -- -i ../docs/exemplo.md -o ~/Downloads -f both
 ```
 
-### Atalho opcional (checkout)
+Ou posicional:
 
 ```bash
-npm run export:checkout
+npm run export -- ../docs/exemplo.md ~/Downloads both
 ```
 
-Equivale a exportar `../docs/checkout-docs.md` para `./output` em PDF e HTML.
+Dentro da pasta do projeto:
 
-## Fidelidade ao preview do Cursor/VS Code
+```bash
+npx md-export -i ../docs/exemplo.md -o ~/Downloads -f both
+```
 
-O **md-to-pdf** não replica tema/CSS do editor. Para resultado mais próximo do preview:
+Atalho de exemplo (ajuste o caminho do `.md` ao seu repositório):
 
-1. **Markdown Preview Enhanced** → preview da extensão → clique direito → **Chrome (Puppeteer) → PDF** ou **HTML (offline)**.
-2. Ou extensão **Markdown PDF** (`yzane.markdown-pdf`).
+```bash
+npm run export:example
+```
+
+### Sem instalar global: `npx` + pasta local
+
+```bash
+npx --yes -p file:/path/to/md-exporter md-export -i /path/to/doc.md -o ~/Downloads -f both
+```
+
+(Se `file:~/...` não expandir `~`, use caminho absoluto.)
+
+---
+
+## Preview do editor vs PDF/HTML gerado
+
+O **md-to-pdf** não copia o tema do Cursor/VS Code. Para algo mais parecido com a preview:
+
+1. **Markdown Preview Enhanced** → preview → clique direito → **Chrome (Puppeteer) → PDF** ou **HTML (offline)**  
+2. Ou extensão **Markdown PDF** (`yzane.markdown-pdf`)
+
+---
 
 ## Requisitos
 
 - Node.js 18+ recomendado  
-- Na primeira execução o Puppeteer pode baixar o Chromium.
+- Na primeira execução o Puppeteer pode baixar o Chromium (pode demorar).
 
-## Estrutura sugerida no monorepo
+---
 
+## Estrutura típica num monorepo
+
+```text
+meu-monorepo/
+  docs/                 ← .md e imagens
+  ferramentas/md-exporter/   ← este projeto (npm install + npm install -g …)
 ```
-koin/
-  docs/              ← documentação (.md, imagens)
-  md-exporter/       ← esta CLI (npm install aqui)
-```
 
-Saída típica: arquivos com o **mesmo nome base** do `.md` (ex.: `guia.md` → `guia.pdf` / `guia.html`).
+Saída: `nome-do-arquivo.pdf` e/ou `nome-do-arquivo.html` na pasta indicada por `-o`.

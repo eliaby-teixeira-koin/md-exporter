@@ -50,8 +50,8 @@ npm run export — IMPORTANTE:
 O diretório base para assets (imagens) é a pasta do .md.
 
 Exemplos:
-  node cli.js -i ../docs/checkout-docs.md -o ./dist -f pdf
-  node cli.js ../docs/checkout-docs.md ~/Downloads both
+  node cli.js -i ../docs/exemplo.md -o ./dist -f pdf
+  node cli.js ../docs/exemplo.md ~/Downloads both
 `);
 };
 
