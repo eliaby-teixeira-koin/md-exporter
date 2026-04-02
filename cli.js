@@ -6,10 +6,18 @@ const os = require('os');
 const path = require('path');
 const { mdToPdf } = require('md-to-pdf');
 
-const HTML_EXPORT_CSS = [
+/**
+ * Injected after md-to-pdf's markdown.css. Default stylesheet uses
+ * `table { display: block; overflow: auto }` which scrolls in browsers but
+ * clips wide tables in PDF; override to real table layout + wrap in cells.
+ */
+const EXPORT_CSS = [
 	'html { box-sizing: border-box; font-size: calc(100% + 1pt); }',
-	'body { padding: 20px; box-sizing: border-box; }',
-	'*, *::before, *::after { box-sizing: inherit; }'
+	'body { padding: 20px; box-sizing: border-box; max-width: 100%; }',
+	'*, *::before, *::after { box-sizing: inherit; }',
+	'table { display: table; width: 100%; table-layout: fixed; overflow: visible; border-collapse: collapse; border-spacing: 0; }',
+	'table th, table td { overflow-wrap: anywhere; word-break: break-word; vertical-align: top; }',
+	'table pre, table code { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }'
 ].join(' ');
 
 const expandHome = (p) => {
@@ -170,16 +178,13 @@ const run = async () => {
 	try {
 		if (doPdf) {
 			console.log(`PDF → ${destPdf}`);
-			await mdToPdf(
-				{ path: args.input },
-				{ dest: destPdf, basedir }
-			);
+			await mdToPdf({ path: args.input }, { dest: destPdf, basedir, css: EXPORT_CSS });
 		}
 		if (doHtml) {
 			console.log(`HTML → ${destHtml}`);
 			await mdToPdf(
 				{ path: args.input },
-				{ dest: destHtml, basedir, as_html: true, css: HTML_EXPORT_CSS }
+				{ dest: destHtml, basedir, as_html: true, css: EXPORT_CSS }
 			);
 		}
 		console.log('Concluído.');
